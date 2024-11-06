@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>duke</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Material+Symbols+Outlined&display=swap">
+        <style type="text/css">
+            body {
+                display: flex;
+                margin: 0;
+                overflow-x: hidden;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                font-family: "Varela Round", sans-serif;
+                font-size: 2.25vmin;
+                width: 100%;
+                background: #222;
+                font-weight: bold;
+            }
+            textarea:focus {
+                outline: none;
+                border: none;
+            }
+
+            .chat {
+                z-index: 1;
+                margin-bottom: 1vh;
+            }
+            .message-container {
+                display: flex;
+                justify-content: center;
+                align-items: start;
+                flex-direction: column;
+                width: 92.5vw;
+                margin: 0.375em;
+                border-radius: 5px;
+                color: #eee;
+            }
+            .message-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                margin-top: 1vh;
+                margin-bottom: 0.5vh;
+            }
+            .message-body {
+                font-size: 0.875em;
+                padding-left: 2vw;
+                padding-right: 2vw;
+                line-height: 3.25vh;
+            }
+            .user {
+                padding-left: 10vw;
+            }
+            .date {
+                padding-right: 10vw;
+            }
+            .input {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 2vh;
+                font-family: "Varela Round", sans-serif;
+                font-weight: bold;
+            }
+            .input textarea {
+                width: 81.5vw;
+                height: 8vh;
+                font-size: 2vmin;
+                border-radius: 5px;
+                border: none;
+                padding-left: 1vw;
+                padding-right: 1vw;
+                padding-top: 1vh;
+                padding-bottom: 1vh;
+                font-family: inherit;
+                font-weight: inherit;
+                overflow-y: auto;
+                resize: none;
+                border-radius: 5px 0px 0px 5px;
+                box-shadow: 0px 0px 5px 2px #333333a0;
+                background: #333;
+                color: #eee;
+                
+            }
+            .input button {
+                font-family: inherit;
+                font-weight: inherit;
+                margin-left: 1vw;
+                box-shadow: 0px 0px 5px 2px #333333a0;
+                background: #333;
+                color: #eee;
+                border: none;
+                border-radius: 0px 5px 5px 0px;
+                height: 10vh;
+                width: 8vw;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                flex-direction: column;
+                cursor: pointer;
+            }
+            .input button span {
+                margin-bottom: 1vh;
+            }
+            .icon {
+                margin-top: 1vh;
+                font-size: 3vmin;
+                font-family: "Material Symbols Outlined";
+            }
+        </style>
+        
+    </head>
+    <body>
+        <div class="chat"></div>
+        <div class="input">
+            <textarea type="text" placeholder="message"></textarea>
+            <button>
+                <span class="icon">send</span>
+                <span>post</span>
+            </button>
+        </div>
+        <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/timezone.js"></script>
+        <script type="module">
+            const PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16cGdpYnRxeHhpbGV3Z2l6dG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyMzI1NTcsImV4cCI6MjA0NTgwODU1N30.73qKqoCQUZ-DLcTmwtd3vbg6CDBZYzPR-XDbm6RZhPs";
+            const URL = "https://mzpgibtqxxilewgiztmy.supabase.co";
+            const { createClient } = supabase;
+            const supa = createClient(URL, PUBLIC_KEY);
+            let res = await supa.from('duke').select('*');
+            let time = "";
+            dayjs.extend(dayjs_plugin_relativeTime);
+            dayjs.extend(dayjs_plugin_timezone);
+            const colors = {
+                "ski": "#5c7457",
+                "duke": "#333333",
+                "smv": "#5b507a",
+                "big dom": "#c16200",
+                "astro": "#3d5c84",
+            }
+            async function gather () {
+                res = await supa.from('duke').select('*').order("time", { ascending: true });
+                let chat = res.data;
+                const $chat = document.createElement("div")
+                $chat.classList.add("chat")
+                chat.forEach(el => {
+                    const $container = document.createElement("div")
+                    $container.classList.add("message-container")
+                    const $header = document.createElement("div")
+                    $header.classList.add("message-header")
+                    const $body = document.createElement("span")
+                    $body.classList.add("message-body")
+                    const $user = document.createElement("span")
+                    $user.classList.add("user")
+                    const $date = document.createElement("span")
+                    $date.classList.add("date")
+                    
+                    $body.innerText = el.text
+                    $user.innerText = el.user
+                    $date.innerText = dayjs(new Date(el.time)).fromNow()
+                    $date.dataset.time = el.time
+                    $container.style.background = Object.keys(colors).includes(el.user) ? colors[el.user] : "#555"
+                    $container.style.boxShadow = "0px 0px 5px 2px " + (Object.keys(colors).includes(el.user) ? colors[el.user] : "#555555") + "a0";
+                    $header.appendChild($user)
+                    $header.appendChild($date)
+                    $container.appendChild($header)
+                    $container.appendChild($body)
+                    $chat.appendChild($container)
+                })
+                return $chat
+            }
+            async function update () {
+                const $chat = document.getElementsByClassName("chat")[0]
+                let el = await gather()
+                if($chat.innerHTML !== el.innerHTML) {
+                    $chat.innerHTML = el.innerHTML
+                }
+                for(const el of document.getElementsByClassName("date")){
+                    el.innerText = dayjs(new Date(el.dataset.time)).fromNow()
+                }
+            }
+            void async function main () {
+                await update();
+                window.scroll(0, document.body.scrollHeight)
+                setInterval(update, 1000)
+                const $input = document.querySelector("textarea")
+                const $button = document.querySelector("button")
+                $button.onclick = async () => {
+                    const text = $input.value
+                    if (text) {
+                        const { error } = await supa.from("duke").insert({
+                            text: text,
+                            user: "duke"
+                        })
+                        if (error) {
+                            console.error(error)
+                        }
+                        $input.value = ""
+                        update();
+                    }
+                }
+            }()
+        </script>
+    </body>
+</html>
